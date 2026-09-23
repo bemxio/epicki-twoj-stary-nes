@@ -260,14 +260,8 @@
             ; spawn ogiens
             jsr random ; generate random number
 
-            cmp #$c0 ; check if random number is equal to 192
-            bne :+ ; jump if it is not
-
-            jsr random ; generate random number for ogien amount
-
-            and #$8 ; limit ogien amount to 0-7
-            tay ; transfer value to Y register
-            iny ; increment value to change range to 1-8
+            cmp #$f8 ; check if random number is greater than or equal to 248 (~5% chance)
+            bcc :+ ; jump if false
 
             ldx #12 ; offset for sprite data
 
@@ -276,7 +270,7 @@
                 cmp #$ff ; check if sprite is not in use
                 bne spawn_ogiens_next ; jump if it is
 
-                jsr random ; generate random number for ogien Y position
+                lda #$10 ; Y position for ogien sprite
                 sta OAM_BUFFER, x ; store value in OAM buffer
 
                 lda #$06 ; tile index for ogien sprite
@@ -288,8 +282,7 @@
                 jsr random ; generate random number for ogien X position
                 sta OAM_BUFFER + 3, x ; store value in OAM buffer
 
-                dey ; decrement ogien amount
-                beq :+ ; jump if all ogiens have been spawned
+                jmp :+ ; jump to moving ogiens
 
                 spawn_ogiens_next:
                     clc ; clear carry flag
