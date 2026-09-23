@@ -15,9 +15,12 @@
     .byte "siema" ; padding
 
 .segment "ZEROPAGE"
-    temp: .res 2 ; temporary variable
     vblank: .res 1 ; vblank flag
     controls: .res 1 ; state of controller buttons
+
+    frame_counter: .res 2 ; counter for number of frames since game start
+    seed: .res 2 ; seed for random number generation
+    temp: .res 2 ; temporary variable
 
 .segment "CODE"
     ; interrupt handlers
@@ -96,7 +99,7 @@
 
             inx ; increment offset
 
-            cpx #16 ; check if all bytes of sprite data have been sent
+            cpx #12 ; check if all bytes of sprite data have been sent
             bne copy_sprites ; loop if not done
 
         ; copy OAM buffer to PPU
@@ -152,6 +155,13 @@
 
             cpx #32 ; check if all bytes of palette data have been sent
             bne load_palettes ; loop if not done
+
+        ; set random seed
+        lda #$21 ; low byte of seed
+        sta seed ; store value in variable
+
+        lda #$37 ; high byte of seed
+        sta seed + 1 ; store value in variable
 
         ; enable interrupts
         cli
@@ -247,11 +257,53 @@
                     dec OAM_BUFFER + 8 ; third sprite
                 .endrep
         :
+            jsr random ; generate random number
+
+            cmp #$c0 ; check if random number is equal to 192
+            bne :+ ; jump if it is not
+
+            jsr random ; generate random number for ogien amount
+
+            and #$8 ; limit ogien amount to 0-7
+            tay ; transfer value to Y register
+            iny ; increment value to change range to 1-8
+
+            ldx #12 ; offset for sprite data
+
+            spawn_ogiens:
+                lda OAM_BUFFER + 2, x ; load attribute byte of sprite to accumulator
+                cmp #$ff ; check if sprite is not in use
+                bne spawn_ogiens_next ; jump if it is
+
+                jsr random ; generate random number for ogien Y position
+                sta OAM_BUFFER, x ; store value in OAM buffer
+
+                lda #$06 ; tile index for ogien sprite
+                sta OAM_BUFFER + 1, x ; store value in OAM buffer
+
+                lda #$00 ; attribute byte for ogien sprite
+                sta OAM_BUFFER + 2, x ; store value in OAM buffer
+
+                jsr random ; generate random number for ogien X position
+                sta OAM_BUFFER + 3, x ; store value in OAM buffer
+
+                dey ; decrement ogien amount
+                beq :+ ; jump if all ogiens have been spawned
+
+                spawn_ogiens_next:
+                    clc ; clear carry flag
+
+                    txa ; transfer offset to accumulator
+                    adc #4 ; increment offset by 4 to point to next sprite
+                    tax ; transfer value back to X register
+
+                    bcc spawn_ogiens ; loop if not run out of free sprites
+        :
             ; unset vblank flag
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
 
-            jmp main_loop ; loop forever
+            jmp main_loop ; loop back to beginning
 
     on_vblank:
         pha ; push accumulator onto stack
@@ -282,12 +334,12 @@
 
     sprite_data: ; Y, tile index, attributes, X
         ; Stary
-        .byte $08, $00, %00000000, $00
-	    .byte $08, $02, %00000000, $08
-	    .byte $08, $04, %00000000, $10
+        .byte $c8, $00, %00000100, $74
+	    .byte $c8, $02, %00000100, $7c
+	    .byte $c8, $04, %00000100, $84
 
         ; Ogien
-        .byte $08, $06, %00000000, $20
+        ;.byte $08, $06, %00000000, $00
 
 .segment "VECTORS"
     .word on_vblank ; NMI handler address
