@@ -257,6 +257,7 @@
                     dec OAM_BUFFER + 8 ; third sprite
                 .endrep
         :
+            ; spawn ogiens
             jsr random ; generate random number
 
             cmp #$c0 ; check if random number is equal to 192
@@ -299,6 +300,38 @@
 
                     bcc spawn_ogiens ; loop if not run out of free sprites
         :
+            ; move ogiens
+            ldx #12 ; offset for sprite data
+
+            move_ogiens:
+                lda OAM_BUFFER + 2, x ; load attribute byte of sprite to accumulator
+                cmp #$ff ; check if sprite is not in use
+                beq move_ogiens_next ; jump if true
+
+                lda OAM_BUFFER, x ; load Y position of sprite to accumulator
+                cmp #$e8 ; check if sprite is offscreen
+                beq move_ogiens_offscreen ; jump if true
+
+                inc OAM_BUFFER, x ; increment Y position of sprite
+                jmp move_ogiens_next ; jump to next sprite
+
+                move_ogiens_offscreen:
+                    lda #$ff ; value to mark sprite as not in use
+
+                    sta OAM_BUFFER, x ; store value in Y position
+                    sta OAM_BUFFER + 1, x ; store value in tile index
+                    sta OAM_BUFFER + 2, x ; store value in attribute byte
+                    sta OAM_BUFFER + 3, x ; store value in X position
+
+                move_ogiens_next:
+                    clc ; clear carry flag
+
+                    txa ; transfer offset to accumulator
+                    adc #4 ; increment offset by 4 to point to next sprite
+                    tax ; transfer value back to X register
+
+                    bcc move_ogiens ; loop if not at end of sprite data
+
             ; unset vblank flag
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
