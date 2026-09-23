@@ -15,3 +15,6 @@ APU_STATUS = $4015
 
 JOY1 = $4016
 ;JOY2 = $4017
+
+; memory locations
+OAM_BUFFER = $0200 ; sprite data in RAM

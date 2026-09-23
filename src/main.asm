@@ -16,6 +16,8 @@
 
 .segment "ZEROPAGE"
     temp: .res 2 ; temporary variable
+    vblank: .res 1 ; vblank flag
+    controls: .res 1 ; state of controller buttons
 
 .segment "CODE"
     ; interrupt handlers
@@ -49,6 +51,7 @@
 
             sta $0000, x ; zero page
             sta $0100, x ; stack page
+            ;sta $0200, x
             sta $0300, x
             sta $0400, x
             sta $0500, x
@@ -56,7 +59,7 @@
             sta $0700, x
 
             lda #$ff ; $ff needed to not display any sprites during initialization
-            sta $0200, x ; OAM buffer
+            sta OAM_BUFFER, x ; OAM buffer
 
             inx ; increment offset
             bne clear_memory ; loop if not done
@@ -89,7 +92,7 @@
 
         copy_sprites:
             lda sprite_data, x ; load byte of sprite data
-            sta $0200, x ; store value in OAM buffer
+            sta OAM_BUFFER, x ; store value in OAM buffer
 
             inx ; increment offset
 
@@ -100,7 +103,7 @@
         lda #0 ; OAM destination address
         sta OAM_ADDR ; send value to OAM address register
 
-        lda #2 ; page number
+        lda #>OAM_BUFFER ; page number
         sta OAM_DMA ; send value to OAM DMA register
 
         ; copy tile data to PPU
@@ -161,16 +164,110 @@
         lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
         sta PPU_MASK ; send value to PPU mask register
 
-        jmp * ; loop forever
+        ; main gameplay loop
+        main_loop:
+            bit vblank ; check if vblank flag is set
+            bpl main_loop ; if not, loop
+
+            jsr read_joystick ; read controller input
+
+            ; right button check
+            controller_check_right:
+                lda controls ; load controller state to accumulator
+
+                and #%00000001 ; check if button is pressed
+                beq controller_check_left ; jump if it is not
+
+                lda OAM_BUFFER + 3 ; load X position of stary to accumulator
+
+                cmp #$e8 ; check if stary is at right edge of screen
+                beq controller_check_left ; jump if true
+
+                ; increment X position of stary
+                .repeat 1
+                    inc OAM_BUFFER + 3 ; first sprite
+                    inc OAM_BUFFER + 7 ; second sprite
+                    inc OAM_BUFFER + 11 ; third sprite
+                .endrep
+
+            ; left button check
+            controller_check_left:
+                lda controls ; load controller state to accumulator
+
+                and #%00000010 ; check if button is pressed
+                beq controller_check_down ; jump if it is not
+
+                lda OAM_BUFFER + 3 ; load X position of stary to accumulator
+
+                cmp #$00 ; check if stary is at left edge of screen
+                beq controller_check_down ; jump if true
+
+                ; decrement X position of stary
+                .repeat 1
+                    dec OAM_BUFFER + 3 ; first sprite
+                    dec OAM_BUFFER + 7 ; second sprite
+                    dec OAM_BUFFER + 11 ; third sprite
+                .endrep
+
+            ; down button check
+            controller_check_down:
+                lda controls ; load controller state to accumulator
+
+                and #%00000100 ; check if button is pressed
+                beq controller_check_up ; jump if it is not
+
+                lda OAM_BUFFER ; load Y position of stary to accumulator
+
+                cmp #$d8 ; check if stary is at bottom edge of screen
+                beq controller_check_up ; jump if true
+
+                ; increment Y position of stary
+                .repeat 1
+                    inc OAM_BUFFER ; first sprite
+                    inc OAM_BUFFER + 4 ; second sprite
+                    inc OAM_BUFFER + 8 ; third sprite
+                .endrep
+
+            ; up button check
+            controller_check_up:
+                lda controls ; load controller state to accumulator
+
+                and #%00001000 ; check if button is pressed
+                beq :+ ; jump if it is not
+
+                lda OAM_BUFFER ; load Y position of stary to accumulator
+
+                cmp #$08 ; check if stary is at top edge of screen
+                beq :+ ; jump if true
+
+                ; decrement Y position of stary
+                .repeat 1
+                    dec OAM_BUFFER ; first sprite
+                    dec OAM_BUFFER + 4 ; second sprite
+                    dec OAM_BUFFER + 8 ; third sprite
+                .endrep
+        :
+            ; unset vblank flag
+            lda #0 ; value for vblank flag
+            sta vblank ; store value into variable
+
+            jmp main_loop ; loop forever
 
     on_vblank:
+        pha ; push accumulator onto stack
+
+        ; set vblank flag for main loop
+        lda #$80 ; value for vblank flag
+        sta vblank ; store value into variable
+
         ; copy OAM buffer to PPU
         lda #0 ; OAM destination address
         sta OAM_ADDR ; send value to OAM address register
 
-        lda #2 ; page number
+        lda #>OAM_BUFFER ; page number
         sta OAM_DMA ; send value to OAM DMA register
 
+        pla ; pull accumulator from stack
         rti ; return from interrupt
 
     ; subroutines
