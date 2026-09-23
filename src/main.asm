@@ -139,6 +139,12 @@
             cpx #32 ; check if all bytes of palette data have been sent
             bne load_palettes ; loop if not done
 
+        ; reset scroll
+        lda #0
+
+        sta PPU_SCROLL ; send value to PPU scroll register (horizontal)
+        sta PPU_SCROLL ; send value to PPU scroll register (vertical)
+
         ; set random seed
         lda #$21 ; low byte of seed
         sta seed ; store value in variable
