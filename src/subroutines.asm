@@ -43,3 +43,40 @@ random: ; https://www.nesdev.org/wiki/Random_number_generator#Simple
 	cmp #0 ; reload flags
 
 	rts ; return from subroutine
+
+is_colliding:
+    ; stary.x + stary.w >= ogien.x
+    lda OAM_BUFFER + 3 ; load X position of stary
+    clc ; clear carry flag
+    adc #24 ; add width of stary to X position
+
+    cmp OAM_BUFFER + 3, x ; compare with X position of ogien
+    bcc :+ ; if stary's right edge is left of ogien's left edge, no collision
+
+    ; stary.y + stary.h >= ogien.y
+    lda OAM_BUFFER ; load Y position of stary
+    clc ; clear carry flag
+    adc #16 ; add height of stary to Y position
+
+    cmp OAM_BUFFER, x ; compare with Y position of ogien
+    bcc :+ ; if stary's bottom edge is above ogien's top edge, no collision
+
+    ; ogien.x + ogien.w >= stary.x
+    lda OAM_BUFFER + 3, x ; load X position of ogien
+    clc ; clear carry flag
+    adc #8 ; add width of ogien to X position
+
+    cmp OAM_BUFFER + 3 ; compare with X position of stary
+    bcc :+ ; if ogien's right edge is left of stary's left edge, no collision
+
+    ; ogien.y + ogien.h >= stary.y
+    lda OAM_BUFFER, x ; load Y position of ogien
+    clc ; clear carry flag
+    adc #16 ; add height of ogien to Y position
+
+    cmp OAM_BUFFER ; compare with Y position of stary
+    bcc :+ ; if ogien's bottom edge is above stary's top edge, no collision
+
+    sec ; set carry flag to indicate collision
+:
+    rts ; return from subroutine

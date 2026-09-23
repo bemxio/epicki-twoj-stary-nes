@@ -282,7 +282,7 @@
                 jsr random ; generate random number for ogien X position
                 sta OAM_BUFFER + 3, x ; store value in OAM buffer
 
-                jmp :+ ; jump to moving ogiens
+                jmp :+ ; jump to processing ogiens
 
                 spawn_ogiens_next:
                     clc ; clear carry flag
@@ -293,22 +293,25 @@
 
                     bcc spawn_ogiens ; loop if not run out of free sprites
         :
-            ; move ogiens
+            ; process active ogiens
             ldx #12 ; offset for sprite data
 
-            move_ogiens:
+            ogiens_loop:
                 lda OAM_BUFFER + 2, x ; load attribute byte of sprite to accumulator
                 cmp #$ff ; check if sprite is not in use
-                beq move_ogiens_next ; jump if true
+                beq ogiens_loop_next ; jump if true
 
                 lda OAM_BUFFER, x ; load Y position of sprite to accumulator
                 cmp #$e8 ; check if sprite is offscreen
-                beq move_ogiens_offscreen ; jump if true
+                beq ogiens_loop_offscreen ; jump if true
+
+                jsr is_colliding ; check if ogien is colliding with stary
+                bcs * ; jump if colliding
 
                 inc OAM_BUFFER, x ; increment Y position of sprite
-                jmp move_ogiens_next ; jump to next sprite
+                jmp ogiens_loop_next ; jump to next sprite
 
-                move_ogiens_offscreen:
+                ogiens_loop_offscreen:
                     lda #$ff ; value to mark sprite as not in use
 
                     sta OAM_BUFFER, x ; store value in Y position
@@ -316,14 +319,14 @@
                     sta OAM_BUFFER + 2, x ; store value in attribute byte
                     sta OAM_BUFFER + 3, x ; store value in X position
 
-                move_ogiens_next:
+                ogiens_loop_next:
                     clc ; clear carry flag
 
                     txa ; transfer offset to accumulator
                     adc #4 ; increment offset by 4 to point to next sprite
                     tax ; transfer value back to X register
 
-                    bcc move_ogiens ; loop if not at end of sprite data
+                    bcc ogiens_loop ; loop if not at end of sprite data
 
             ; unset vblank flag
             lda #0 ; value for vblank flag
