@@ -18,7 +18,6 @@
     vblank: .res 1 ; vblank flag
     controls: .res 1 ; state of controller buttons
 
-    frame_counter: .res 2 ; counter for number of frames since game start
     seed: .res 2 ; seed for random number generation
     temp: .res 2 ; temporary variable
 
@@ -69,8 +68,14 @@
 
         jsr wait_for_vblank ; wait for vblank to ensure PPU is ready
 
-        ; clear background memory
+        ; copy background data to PPU
         lda PPU_STATUS ; reset address latch
+
+        lda #<background_data ; low byte of background data address
+        sta temp ; store value in temporary variable
+
+        lda #>background_data ; high byte of background data address
+        sta temp + 1 ; store value in temporary variable
 
         lda #$20 ; high byte of background data address in PPU memory
         sta PPU_ADDR ; send value to PPU address register
@@ -78,19 +83,20 @@
         lda #$00 ; low byte of address
         sta PPU_ADDR ; send value to PPU address register
 
-        ldx #4 ; number of pages to clear
-        ldy #0 ; offset for background memory
+        ldx #4 ; number of pages of background data
+        ldy #0 ; offset for background data
 
-        clear_background:
+        copy_background:
+            lda (temp), y ; load byte of background data
             sta PPU_DATA ; send value to PPU data register
 
             iny ; increment offset
-            bne clear_background ; loop if not done
+            bne copy_background ; loop if not done
 
-            dex ; decrement number of pages to clear
-            bne clear_background ; loop if not done
+            inc temp + 1 ; increment high byte of background data address
 
-        jsr init_sprites ; initialize sprites
+            dex ; decrement number of pages of background data
+            bne copy_background ; loop if not done
 
         ; copy tile data to PPU
         lda PPU_STATUS ; reset address latch
@@ -139,11 +145,7 @@
             cpx #32 ; check if all bytes of palette data have been sent
             bne load_palettes ; loop if not done
 
-        ; reset scroll
-        lda #0
-
-        sta PPU_SCROLL ; send value to PPU scroll register (horizontal)
-        sta PPU_SCROLL ; send value to PPU scroll register (vertical)
+        jsr reset_scroll ; reset scroll position
 
         ; set random seed
         lda #$21 ; low byte of seed
@@ -163,10 +165,60 @@
         lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
         sta PPU_MASK ; send value to PPU mask register
 
-        ; main gameplay loop
-        main_loop:
+        ; title screen loop
+        title_screen_loop:
             bit vblank ; check if vblank flag is set
-            bpl main_loop ; if not, loop
+            bpl title_screen_loop ; if not, loop
+
+            ; unset vblank flag
+            lda #0 ; value for vblank flag
+            sta vblank ; store value into variable
+
+            jsr read_joystick ; read controller input
+
+            ; check if start button is pressed
+            lda controls ; load controller state to accumulator
+
+            and #%00010000 ; check if start button is pressed
+            beq title_screen_loop ; loop if it is not
+
+            ; temporarily disable rendering
+            lda #0 ; clear accumulator
+            sta PPU_MASK ; send value to PPU mask register
+
+            ; clear background memory
+            lda PPU_STATUS ; reset address latch
+
+            lda #$20 ; high byte of background data address in PPU memory
+            sta PPU_ADDR ; send value to PPU address register
+
+            lda #$00 ; low byte of address
+            sta PPU_ADDR ; send value to PPU address register
+
+            ldx #4 ; number of pages to clear
+            ldy #0 ; offset for background memory
+
+            clear_background:
+                sta PPU_DATA ; send value to PPU data register
+
+                iny ; increment offset
+                bne clear_background ; loop if not done
+
+                dex ; decrement number of pages to clear
+                bne clear_background ; loop if not done
+
+            jsr reset_scroll ; reset scroll position
+
+            ; re-enable rendering
+            lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
+            sta PPU_MASK ; send value to PPU mask register
+
+            jsr init_sprites ; initialize sprites
+
+        ; gameplay loop
+        gameplay_loop:
+            bit vblank ; check if vblank flag is set
+            bpl gameplay_loop ; if not, loop
 
             jsr read_joystick ; read controller input
 
@@ -324,7 +376,7 @@
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
 
-            jmp main_loop ; loop back to beginning
+            jmp gameplay_loop ; loop back to beginning
 
     on_vblank:
         pha ; push accumulator onto stack
@@ -352,6 +404,9 @@
 
     palette_data:
         .incbin "assets/palette.pal" ; palette data for sprites and background
+
+    background_data:
+        .incbin "assets/title_screen.nam" ; background data for the title screen
 
     sprite_data: ; Y, tile index, attributes, X
         ; Stary

@@ -4,6 +4,14 @@ wait_for_vblank:
 
     rts ; return from subroutine
 
+reset_scroll:
+    lda #0 ; value for horizontal and vertical scroll
+
+    sta PPU_SCROLL ; send value to PPU scroll register (horizontal)
+    sta PPU_SCROLL ; send value to PPU scroll register (vertical)
+
+    rts ; return from subroutine
+
 read_joystick: ; https://www.nesdev.org/wiki/Controller_reading_code#Basic_Example
     lda #1 ; controller port latch bit
     sta JOY1 ; send value to controller port
@@ -103,12 +111,5 @@ init_sprites:
 
         cpx #64 ; check if all bytes of OAM buffer have been cleared
         bne init_sprites_clear ; loop if not done
-
-    ; copy OAM buffer to PPU
-    lda #0 ; OAM destination address
-    sta OAM_ADDR ; send value to OAM address register
-
-    lda #>OAM_BUFFER ; page number
-    sta OAM_DMA ; send value to OAM DMA register
 
     rts ; return from subroutine
