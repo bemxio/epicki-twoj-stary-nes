@@ -147,13 +147,6 @@
 
         jsr reset_scroll ; reset scroll position
 
-        ; set random seed
-        lda #$21 ; low byte of seed
-        sta seed ; store value in variable
-
-        lda #$37 ; high byte of seed
-        sta seed + 1 ; store value in variable
-
         ; enable interrupts
         cli
 
@@ -170,17 +163,26 @@
             bit vblank ; check if vblank flag is set
             bpl title_screen_loop ; if not, loop
 
+            ; increment seed
+            clc ; clear carry flag
+
+            lda seed ; load low byte of seed
+            adc #1 ; increment low byte of seed
+            sta seed ; store low byte of new seed
+
+            lda seed + 1 ; load high byte of seed
+            adc #0 ; add carry from low byte increment
+            sta seed + 1 ; store high byte of new seed
+
             ; unset vblank flag
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
 
             jsr read_joystick ; read controller input
 
-            ; check if start button is pressed
+            ; check if any button is pressed
             lda controls ; load controller state to accumulator
-
-            and #%00010000 ; check if start button is pressed
-            beq title_screen_loop ; loop if it is not
+            beq title_screen_loop ; if no button is pressed, loop
 
             ; temporarily disable rendering
             lda #0 ; clear accumulator
