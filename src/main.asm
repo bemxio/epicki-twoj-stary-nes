@@ -1,0 +1,176 @@
+; constants
+.include "constants.asm"
+
+; segments
+.segment "HEADER"
+    .byte "NES", $1a ; identification string
+    .byte 2 ; size of PRG-ROM in 16K units
+    .byte 0 ; size of CHR-ROM in 8K units (CHR-RAM)
+
+    .byte %00000000 ; lower nibble of mapper, mirroring, battery, trainer
+    .byte %00000000 ; upper nibble of mapper, VS/Playchoice, NES 2.0
+    .byte 0 ; PRG-RAM size
+    .byte 0 ; TV system (0 = NTSC, 1 = PAL)
+    .byte 0 ; TV system, PRG-RAM presence, bus conflicts
+    .byte "siema" ; padding
+
+.segment "ZEROPAGE"
+    temp: .res 2 ; temporary variable
+
+.segment "CODE"
+    ; interrupt handlers
+    on_reset:
+        sei ; disable interrupts
+        cld ; disable decimal mode
+
+        ; disable APU IRQs
+        lda #%01000000 ; mode 0 (4-step), IRQ inhibit flag enabled
+        sta APU_FRAME_COUNTER ; send value to APU frame counter
+
+        ; initalize stack pointer
+        ldx #$ff ; stack address
+        txs ; transfer value to stack pointer
+
+        ; disable NMI, rendering, and DMC IRQs
+        lda #0 ; value to send to appropriate registers
+
+        sta PPU_CTRL ; send value to PPU control register
+        sta PPU_MASK ; send value to PPU mask register
+        sta APU_DMC ; send value to APU DMC
+
+        bit PPU_STATUS ; clear vblank flag
+        jsr wait_for_vblank ; wait for vblank to ensure PPU is ready
+
+        ; clear internal RAM
+        ldx #0 ; offset for RAM
+
+        clear_memory:
+            lda #0 ; value to clear RAM with
+
+            sta $0000, x ; zero page
+            sta $0100, x ; stack page
+            sta $0300, x
+            sta $0400, x
+            sta $0500, x
+            sta $0600, x
+            sta $0700, x
+
+            lda #$ff ; $ff needed to not display any sprites during initialization
+            sta $0200, x ; OAM buffer
+
+            inx ; increment offset
+            bne clear_memory ; loop if not done
+
+        jsr wait_for_vblank ; wait for vblank to ensure PPU is ready
+
+        ; clear background memory
+        lda PPU_STATUS ; reset address latch
+
+        lda #$20 ; high byte of background data address in PPU memory
+        sta PPU_ADDR ; send value to PPU address register
+
+        lda #$00 ; low byte of address
+        sta PPU_ADDR ; send value to PPU address register
+
+        ldx #4 ; number of pages to clear
+        ldy #0 ; offset for background memory
+
+        clear_background:
+            sta PPU_DATA ; send value to PPU data register
+
+            iny ; increment offset
+            bne clear_background ; loop if not done
+
+            dex ; decrement number of pages to clear
+            bne clear_background ; loop if not done
+
+        ; copy OAM buffer to PPU
+        lda #0 ; OAM destination address
+        sta OAM_ADDR ; send value to OAM address register
+
+        lda #2 ; page number
+        sta OAM_DMA ; send value to OAM DMA register
+
+        ; copy tile data to PPU
+        lda PPU_STATUS ; reset address latch
+
+        lda #<tile_data ; low byte of tile data address
+        sta temp ; store value in temporary variable
+
+        lda #>tile_data ; high byte of tile data address
+        sta temp + 1 ; store value in temporary variable
+
+        ldx #32 ; number of pages of tile data
+        ldy #0 ; offset for tile data
+
+        sty PPU_ADDR ; set low byte of PPU memory address
+        sty PPU_ADDR ; set high byte of PPU memory address
+
+        copy_tiles:
+            lda (temp), y ; load byte of tile data
+            sta PPU_DATA ; send value to PPU data register
+
+            iny ; increment offset
+            bne copy_tiles ; loop if not done
+
+            inc temp + 1 ; increment high byte of tile data address
+
+            dex ; decrement number of pages of tile data
+            bne copy_tiles ; loop if not done
+
+        ; copy palette data to PPU
+        lda PPU_STATUS ; reset address latch
+
+        lda #$3f ; high byte of palette data address in PPU memory
+        sta PPU_ADDR ; send value to PPU address register
+
+        lda #$00 ; low byte of address
+        sta PPU_ADDR ; send value to PPU address register
+
+        ldx #0 ; offset for palette data
+
+        load_palettes:
+            lda palette_data, x ; load byte of palette data
+            sta PPU_DATA ; send value to PPU data register
+
+            inx ; increment offset
+
+            cpx #32 ; check if all bytes of palette data have been sent
+            bne load_palettes ; loop if not done
+
+        ; enable interrupts
+        cli
+
+        ; set up NMI
+        lda #%10010000 ; enable NMI on vblank, $1000 as background pattern table address
+        sta PPU_CTRL ; send value to PPU control register
+
+        ; show sprites and background
+        lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
+        sta PPU_MASK ; send value to PPU mask register
+
+        jmp * ; loop forever
+
+    on_vblank:
+        ; copy OAM buffer to PPU
+        lda #0 ; OAM destination address
+        sta OAM_ADDR ; send value to OAM address register
+
+        lda #2 ; page number
+        sta OAM_DMA ; send value to OAM DMA register
+
+        rti ; return from interrupt
+
+    ; subroutines
+    .include "subroutines.asm"
+
+.segment "RODATA"
+    tile_data:
+        .incbin "assets/tiles.chr" ; tile data for sprites and background
+
+    palette_data:
+        .incbin "assets/palette.pal" ; palette data for sprites and background
+
+.segment "VECTORS"
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address

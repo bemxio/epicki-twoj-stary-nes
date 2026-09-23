@@ -1,0 +1,11 @@
+# NES ROMs
+*.nes
+
+# Object files
+*.o
+
+# Original assets
+_assets/
+
+# Build directory
+build/
