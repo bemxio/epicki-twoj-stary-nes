@@ -4,11 +4,13 @@
 ; segments
 .segment "HEADER"
     .byte "NES", $1a ; identification string
-    .byte 2 ; size of PRG-ROM in 16K units
+    .byte 8 ; size of PRG-ROM in 16K units
     .byte 0 ; size of CHR-ROM in 8K units (CHR-RAM)
 
-    .byte %00000000 ; lower nibble of mapper, mirroring, battery, trainer
-    .byte %00000000 ; upper nibble of mapper, VS/Playchoice, NES 2.0
+    ; iNES Mapper 180 (UNROM w/ fixed 1st bank)
+    .byte %01000000 ; lower nibble of mapper, mirroring, battery, trainer
+    .byte %10110000 ; upper nibble of mapper, VS/Playchoice, NES 2.0
+
     .byte 0 ; PRG-RAM size
     .byte 0 ; TV system (0 = NTSC, 1 = PAL)
     .byte 0 ; TV system, PRG-RAM presence, bus conflicts
@@ -17,8 +19,8 @@
 .segment "ZEROPAGE"
     vblank: .res 1 ; vblank flag
     controls: .res 1 ; state of controller buttons
-
     seed: .res 2 ; seed for random number generation
+
     temp: .res 2 ; temporary variable
 
 .segment "CODE"
