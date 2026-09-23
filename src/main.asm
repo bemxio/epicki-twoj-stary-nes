@@ -84,6 +84,18 @@
             dex ; decrement number of pages to clear
             bne clear_background ; loop if not done
 
+        ; copy sprite data to OAM buffer
+        ldx #0 ; offset for sprite data
+
+        copy_sprites:
+            lda sprite_data, x ; load byte of sprite data
+            sta $0200, x ; store value in OAM buffer
+
+            inx ; increment offset
+
+            cpx #16 ; check if all bytes of sprite data have been sent
+            bne copy_sprites ; loop if not done
+
         ; copy OAM buffer to PPU
         lda #0 ; OAM destination address
         sta OAM_ADDR ; send value to OAM address register
@@ -142,7 +154,7 @@
         cli
 
         ; set up NMI
-        lda #%10010000 ; enable NMI on vblank, $1000 as background pattern table address
+        lda #%10110000 ; enable NMI on vblank, 8x16 sprite size, $1000 as background pattern table address
         sta PPU_CTRL ; send value to PPU control register
 
         ; show sprites and background
@@ -170,6 +182,15 @@
 
     palette_data:
         .incbin "assets/palette.pal" ; palette data for sprites and background
+
+    sprite_data: ; Y, tile index, attributes, X
+        ; Stary
+        .byte $08, $00, %00000000, $00
+	    .byte $08, $02, %00000000, $08
+	    .byte $08, $04, %00000000, $10
+
+        ; Ogien
+        .byte $08, $06, %00000000, $20
 
 .segment "VECTORS"
     .word on_vblank ; NMI handler address
