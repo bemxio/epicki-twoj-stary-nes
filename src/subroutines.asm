@@ -80,3 +80,35 @@ is_colliding:
     sec ; set carry flag to indicate collision
 :
     rts ; return from subroutine
+
+init_sprites:
+    ; copy stary sprite data to OAM buffer
+    ldx #0 ; offset for sprite data
+
+    init_sprites_copy:
+        lda sprite_data, x ; load byte of sprite data
+        sta OAM_BUFFER, x ; store value in OAM buffer
+
+        inx ; increment offset
+
+        cpx #12 ; check if all bytes of sprite data have been sent
+        bne init_sprites_copy ; loop if not done
+
+    ; clear remaining OAM buffer space
+    init_sprites_clear:
+        lda #$ff ; value to mark sprite as not in use
+        sta OAM_BUFFER, x ; store value in OAM buffer
+
+        inx ; increment offset
+
+        cpx #64 ; check if all bytes of OAM buffer have been cleared
+        bne init_sprites_clear ; loop if not done
+
+    ; copy OAM buffer to PPU
+    lda #0 ; OAM destination address
+    sta OAM_ADDR ; send value to OAM address register
+
+    lda #>OAM_BUFFER ; page number
+    sta OAM_DMA ; send value to OAM DMA register
+
+    rts ; return from subroutine

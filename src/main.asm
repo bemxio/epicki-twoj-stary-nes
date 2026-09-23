@@ -90,24 +90,7 @@
             dex ; decrement number of pages to clear
             bne clear_background ; loop if not done
 
-        ; copy sprite data to OAM buffer
-        ldx #0 ; offset for sprite data
-
-        copy_sprites:
-            lda sprite_data, x ; load byte of sprite data
-            sta OAM_BUFFER, x ; store value in OAM buffer
-
-            inx ; increment offset
-
-            cpx #12 ; check if all bytes of sprite data have been sent
-            bne copy_sprites ; loop if not done
-
-        ; copy OAM buffer to PPU
-        lda #0 ; OAM destination address
-        sta OAM_ADDR ; send value to OAM address register
-
-        lda #>OAM_BUFFER ; page number
-        sta OAM_DMA ; send value to OAM DMA register
+        jsr init_sprites ; initialize sprites
 
         ; copy tile data to PPU
         lda PPU_STATUS ; reset address latch
@@ -306,8 +289,11 @@
                 beq ogiens_loop_offscreen ; jump if true
 
                 jsr is_colliding ; check if ogien is colliding with stary
-                bcs * ; jump if colliding
+                bcc :+ ; proceed with ogien if not colliding
 
+                jsr init_sprites ; reset sprites
+                jmp :++ ; jump to next vblank
+            :
                 inc OAM_BUFFER, x ; increment Y position of sprite
                 jmp ogiens_loop_next ; jump to next sprite
 
@@ -327,7 +313,7 @@
                     tax ; transfer value back to X register
 
                     bcc ogiens_loop ; loop if not at end of sprite data
-
+        :
             ; unset vblank flag
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
