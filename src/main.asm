@@ -149,6 +149,10 @@
 
         jsr reset_scroll ; reset scroll position
 
+        ; switch to bank 1 for sample data
+        lda #1 ; bank index
+        sta BANK_SELECT ; send value to bank select register
+
         ; enable interrupts
         cli
 
@@ -424,3 +428,5 @@
 .segment "VECTORS"
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+
+.include "samples.asm" ; DMC sample data in switchable banks
