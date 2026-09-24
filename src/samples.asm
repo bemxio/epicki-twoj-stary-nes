@@ -201,39 +201,13 @@
     .align 16
     .incbin "assets/bgm.dmc", $35CD6, $FF1 ; chunk #55
     .align 16
-    .incbin "assets/bgm.dmc", $36CC7, $FF1 ; chunk #56
-    .res 9 ; padding
+    .incbin "assets/bgm.dmc", $36CC7, $A9E ; chunk #56
+    .res 1372 ; padding
 
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
 
 .segment "BANK15"
-    ; DMC sample data
-    .incbin "assets/bgm.dmc", $37CB8, $FF1 ; chunk #57
-    .align 16
-    .incbin "assets/bgm.dmc", $38CA9, $FF1 ; chunk #58
-    .align 16
-    .incbin "assets/bgm.dmc", $39C9A, $FF1 ; chunk #59
-    .align 16
-    .incbin "assets/bgm.dmc", $3AC8B, $FF1 ; chunk #60
-    .res 9 ; padding
-
-    ; vector table
-    .word on_vblank ; NMI handler address
-    .word on_reset ; reset handler address
 
 .segment "BANK16"
-    ; DMC sample data
-    .incbin "assets/bgm.dmc", $3BC7C, $FF1 ; chunk #61
-    .align 16
-    .incbin "assets/bgm.dmc", $3CC6D, $FF1 ; chunk #62
-    .align 16
-    .incbin "assets/bgm.dmc", $3DC5E, $FF1 ; chunk #63
-    .align 16
-    .incbin "assets/bgm.dmc", $3EC4F, $FF1 ; chunk #64
-    .res 9 ; padding
-
-    ; vector table
-    .word on_vblank ; NMI handler address
-    .word on_reset ; reset handler address

@@ -17,7 +17,7 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as file:
 
         remaining_bytes = min(0x3fc4, sample_size)
 
-        while remaining_bytes > 0:
+        while remaining_bytes > 0 and sample_size > 0:
             file.write(f"    .incbin \"{SAMPLE_PATH}\", ${address:05X}, ${min(0xff1, remaining_bytes):03X} ; chunk #{address // 0xff1 + 1}\n")
 
             if remaining_bytes <= 0xff1:
@@ -33,8 +33,4 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as file:
             remaining_bytes -= min(0xff1, remaining_bytes)
 
         sample_size -= min(0x3fc4, sample_size)
-
-        if sample_size == 0:
-            break
-
         file.write("\n")
