@@ -21,6 +21,9 @@
     controls: .res 1 ; state of controller buttons
     seed: .res 2 ; seed for random number generation
 
+    sample_address: .res 1 ; address of sample data in 64-byte pages
+    bank_index: .res 1 ; index of current bank for sample data
+
     temp: .res 2 ; temporary variable
 
 .segment "CODE"
@@ -149,10 +152,6 @@
 
         jsr reset_scroll ; reset scroll position
 
-        ; switch to bank 1 for sample data
-        lda #1 ; bank index
-        sta BANK_SELECT ; send value to bank select register
-
         ; enable interrupts
         cli
 
@@ -163,6 +162,25 @@
         ; show sprites and background
         lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
         sta PPU_MASK ; send value to PPU mask register
+
+        ; switch to bank 1 for sample data
+        lda #1 ; bank index
+        sta bank_index ; store value in variable
+        sta BANK_SELECT ; send value to bank select register
+
+        ; set up APU
+        lda #%10001000 ; IRQ enabled, loop disabled, ~9.42 kHz sample rate
+        sta APU_DMC ; send value to APU DMC register
+
+        lda #0 ; address of sample data in 64-byte pages
+        sta APU_DMC + 2 ; send value to APU DMC register
+
+        lda #$ff ; length of sample data in 16-byte units
+        sta APU_DMC + 3 ; send value to APU DMC register
+
+        ; start playing first sample
+        lda #%00010000 ; enable DMC channel
+        sta APU_STATUS ; send value to APU status register
 
         ; title screen loop
         title_screen_loop:
@@ -403,6 +421,38 @@
         pla ; pull accumulator from stack
         rti ; return from interrupt
 
+    on_sample_end:
+        lda sample_address ; load current sample address
+
+        cmp #$c0 ; check if last sample in bank has been played
+        bne :+ ; jump if not
+
+        inc bank_index ; increment bank index
+        lda bank_index ; load new bank index
+        sta BANK_SELECT ; send value to bank select register
+
+        lda #0 ; reset sample address
+        sta sample_address ; store new sample address
+
+        jmp :++ ; skip incrementing sample address
+    :
+        clc ; clear carry flag
+
+        lda sample_address ; load current sample address
+        adc #$40 ; increment sample address
+        sta sample_address ; store new sample address
+    :
+        lda sample_address ; address of sample data in 64-byte pages
+        sta APU_DMC + 2 ; send value to APU DMC register
+
+        lda #$ff ; length of sample data in 16-byte units
+        sta APU_DMC + 3 ; send value to APU DMC register
+
+        lda #%00010000 ; enable DMC channel
+        sta APU_STATUS ; send value to APU status register
+
+        rti ; return from interrupt
+
     ; subroutines
     .include "subroutines.asm"
 
@@ -428,5 +478,6 @@
 .segment "VECTORS"
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .include "samples.asm" ; DMC sample data in switchable banks

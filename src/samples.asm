@@ -12,6 +12,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK2"
     ; DMC sample data
@@ -27,6 +28,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK3"
     ; DMC sample data
@@ -42,6 +44,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK4"
     ; DMC sample data
@@ -57,6 +60,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK5"
     ; DMC sample data
@@ -72,6 +76,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK6"
     ; DMC sample data
@@ -87,6 +92,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK7"
     ; DMC sample data
@@ -102,6 +108,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK8"
     ; DMC sample data
@@ -117,6 +124,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK9"
     ; DMC sample data
@@ -132,6 +140,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK10"
     ; DMC sample data
@@ -147,6 +156,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK11"
     ; DMC sample data
@@ -162,6 +172,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK12"
     ; DMC sample data
@@ -177,6 +188,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK13"
     ; DMC sample data
@@ -192,6 +204,7 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK14"
     ; DMC sample data
@@ -207,7 +220,11 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
 
 .segment "BANK15"
+    ; DMC sample data
 
 .segment "BANK16"
+    ; DMC sample data
+

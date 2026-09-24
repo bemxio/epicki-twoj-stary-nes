@@ -10,7 +10,7 @@ ASSETS_DIR = assets
 BUILD_DIR = build
 
 SOURCES = $(wildcard $(SRC_DIR)/*.asm)
-ASSETS = $(ASSETS_DIR)/tiles.chr $(ASSETS_DIR)/palette.pal
+ASSETS = $(wildcard $(ASSETS_DIR)/*)
 
 FILENAME = EpickiTwojStary
 

@@ -26,6 +26,7 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as file:
                 file.write("    ; vector table\n")
                 file.write("    .word on_vblank ; NMI handler address\n")
                 file.write("    .word on_reset ; reset handler address\n")
+                file.write("    .word on_sample_end ; IRQ handler address\n")
             else:
                 file.write("    .align 16\n")
 
