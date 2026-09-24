@@ -4,7 +4,7 @@
 ; segments
 .segment "HEADER"
     .byte "NES", $1a ; identification string
-    .byte 8 ; size of PRG-ROM in 16K units
+    .byte 16 ; size of PRG-ROM in 16K units
     .byte 0 ; size of CHR-ROM in 8K units (CHR-RAM)
 
     ; iNES Mapper 180 (UNROM w/ fixed 1st bank)

@@ -102,3 +102,138 @@
     ; vector table
     .word on_vblank ; NMI handler address
     .word on_reset ; reset handler address
+
+.segment "BANK8"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $1BE5C, $FF1 ; chunk #29
+    .align 16
+    .incbin "assets/bgm.dmc", $1CE4D, $FF1 ; chunk #30
+    .align 16
+    .incbin "assets/bgm.dmc", $1DE3E, $FF1 ; chunk #31
+    .align 16
+    .incbin "assets/bgm.dmc", $1EE2F, $FF1 ; chunk #32
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK9"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $1FE20, $FF1 ; chunk #33
+    .align 16
+    .incbin "assets/bgm.dmc", $20E11, $FF1 ; chunk #34
+    .align 16
+    .incbin "assets/bgm.dmc", $21E02, $FF1 ; chunk #35
+    .align 16
+    .incbin "assets/bgm.dmc", $22DF3, $FF1 ; chunk #36
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK10"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $23DE4, $FF1 ; chunk #37
+    .align 16
+    .incbin "assets/bgm.dmc", $24DD5, $FF1 ; chunk #38
+    .align 16
+    .incbin "assets/bgm.dmc", $25DC6, $FF1 ; chunk #39
+    .align 16
+    .incbin "assets/bgm.dmc", $26DB7, $FF1 ; chunk #40
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK11"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $27DA8, $FF1 ; chunk #41
+    .align 16
+    .incbin "assets/bgm.dmc", $28D99, $FF1 ; chunk #42
+    .align 16
+    .incbin "assets/bgm.dmc", $29D8A, $FF1 ; chunk #43
+    .align 16
+    .incbin "assets/bgm.dmc", $2AD7B, $FF1 ; chunk #44
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK12"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $2BD6C, $FF1 ; chunk #45
+    .align 16
+    .incbin "assets/bgm.dmc", $2CD5D, $FF1 ; chunk #46
+    .align 16
+    .incbin "assets/bgm.dmc", $2DD4E, $FF1 ; chunk #47
+    .align 16
+    .incbin "assets/bgm.dmc", $2ED3F, $FF1 ; chunk #48
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK13"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $2FD30, $FF1 ; chunk #49
+    .align 16
+    .incbin "assets/bgm.dmc", $30D21, $FF1 ; chunk #50
+    .align 16
+    .incbin "assets/bgm.dmc", $31D12, $FF1 ; chunk #51
+    .align 16
+    .incbin "assets/bgm.dmc", $32D03, $FF1 ; chunk #52
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK14"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $33CF4, $FF1 ; chunk #53
+    .align 16
+    .incbin "assets/bgm.dmc", $34CE5, $FF1 ; chunk #54
+    .align 16
+    .incbin "assets/bgm.dmc", $35CD6, $FF1 ; chunk #55
+    .align 16
+    .incbin "assets/bgm.dmc", $36CC7, $FF1 ; chunk #56
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK15"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $37CB8, $FF1 ; chunk #57
+    .align 16
+    .incbin "assets/bgm.dmc", $38CA9, $FF1 ; chunk #58
+    .align 16
+    .incbin "assets/bgm.dmc", $39C9A, $FF1 ; chunk #59
+    .align 16
+    .incbin "assets/bgm.dmc", $3AC8B, $FF1 ; chunk #60
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+
+.segment "BANK16"
+    ; DMC sample data
+    .incbin "assets/bgm.dmc", $3BC7C, $FF1 ; chunk #61
+    .align 16
+    .incbin "assets/bgm.dmc", $3CC6D, $FF1 ; chunk #62
+    .align 16
+    .incbin "assets/bgm.dmc", $3DC5E, $FF1 ; chunk #63
+    .align 16
+    .incbin "assets/bgm.dmc", $3EC4F, $FF1 ; chunk #64
+    .res 9 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
