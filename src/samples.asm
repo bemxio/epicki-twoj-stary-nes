@@ -223,8 +223,4 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK15"
-    ; DMC sample data
-
-.segment "BANK16"
-    ; DMC sample data
-
+    ; empty for total ROM size of 256 KB
