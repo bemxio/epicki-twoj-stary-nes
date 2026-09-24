@@ -202,7 +202,7 @@
             lda #0 ; value for vblank flag
             sta vblank ; store value into variable
 
-            jsr read_joystick ; read controller input
+            jsr read_joystick_safe ; read controller input
 
             ; check if any button is pressed
             lda controls ; load controller state to accumulator
@@ -246,7 +246,7 @@
             bit vblank ; check if vblank flag is set
             bpl gameplay_loop ; if not, loop
 
-            jsr read_joystick ; read controller input
+            jsr read_joystick_safe ; read controller input
 
             ; right button check
             controller_check_right:

@@ -31,6 +31,21 @@ read_joystick: ; https://www.nesdev.org/wiki/Controller_reading_code#Basic_Examp
 
     rts ; return from subroutine
 
+read_joystick_safe:
+    jsr read_joystick ; read joystick state
+
+    read_joystick_safe_loop:
+        lda controls ; load controls variable
+        pha ; push controller state to stack
+
+        jsr read_joystick ; read joystick state again
+
+        pla ; pull previous controller state from stack
+        cmp controls ; compare previous state with current state
+        bne read_joystick_safe_loop ; loop until values match
+
+    rts ; return from subroutine
+
 random: ; https://www.nesdev.org/wiki/Random_number_generator#Simple
     lda #8 ; iteration count (generates 8 bits)
     sta temp ; store value in variable
