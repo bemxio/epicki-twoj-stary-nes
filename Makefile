@@ -26,7 +26,7 @@ clean:
 run: $(BUILD_DIR)/$(FILENAME).nes
 	mesen $<
 
-fceux-run: $(BUILD_DIR)/$(FILENAME).nes
+run-fceux: $(BUILD_DIR)/$(FILENAME).nes
 	fceux $<
 
 # rules
