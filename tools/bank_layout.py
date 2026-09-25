@@ -23,7 +23,7 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as file:
             if remaining_bytes <= 0xff1:
                 file.write(f"    .res {0x1000 - min(0xff1, remaining_bytes) - 6} ; padding\n\n")
             else:
-                file.write("    .align 16\n")
+                file.write("    .align 64\n")
 
             address += 0xff1
             remaining_bytes -= min(0xff1, remaining_bytes)
