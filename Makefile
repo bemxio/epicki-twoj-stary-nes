@@ -30,10 +30,10 @@ fceux-run: $(BUILD_DIR)/$(FILENAME).nes
 	fceux $<
 
 # rules
-$(BUILD_DIR)/$(FILENAME).nes: $(BUILD_DIR)/main.o $(SOURCES)
+$(BUILD_DIR)/$(FILENAME).nes: $(BUILD_DIR)/main.o $(SOURCES) $(ASSETS)
 	$(LD) $(LDFLAGS) $< -o $@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm $(ASSETS) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm | $(BUILD_DIR)
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(BUILD_DIR):
