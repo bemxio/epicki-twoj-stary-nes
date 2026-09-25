@@ -7,9 +7,9 @@
     .byte 16 ; size of PRG-ROM in 16K units
     .byte 0 ; size of CHR-ROM in 8K units (CHR-RAM)
 
-    ; iNES Mapper 180 (UNROM w/ fixed 1st bank)
-    .byte %01000000 ; lower nibble of mapper, mirroring, battery, trainer
-    .byte %10110000 ; upper nibble of mapper, VS/Playchoice, NES 2.0
+    ; iNES Mapper 1 (MMC1, more specifically SGROM)
+    .byte %00010000 ; lower nibble of mapper, mirroring, battery, trainer
+    .byte %00000000 ; upper nibble of mapper, VS/Playchoice, NES 2.0
 
     .byte 0 ; PRG-RAM size
     .byte 0 ; TV system (0 = NTSC, 1 = PAL)
@@ -163,10 +163,17 @@
         lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
         sta PPU_MASK ; send value to PPU mask register
 
-        ; switch to bank 1 for sample data
-        lda #1 ; bank index
-        sta bank_index ; store value in variable
-        sta BANK_SELECT ; send value to bank select register
+        ; initialize MMC1
+        lda #$80 ; reset MMC1 shift register
+        sta MMC1_CTRL ; send value to MMC1 control register
+
+        lda #%01000 ; fixed first PRG-ROM bank, horizontal mirroring
+        sta MMC1_CTRL ; send first bit to MMC1 control register
+
+        .repeat 4 ; repeat 4 times to send remaining bits
+            lsr a ; shift accumulator right to get next bit
+            sta MMC1_CTRL ; send next bit to MMC1 control register
+        .endrep
 
         ; set up APU
         lda #%10001000 ; IRQ enabled, loop disabled, ~9.42 kHz sample rate
@@ -427,9 +434,16 @@
         cmp #$c0 ; check if last sample in bank has been played
         bne :+ ; jump if not
 
+        ; switch to next bank of sample data
         inc bank_index ; increment bank index
-        lda bank_index ; load new bank index
-        sta BANK_SELECT ; send value to bank select register
+        lda bank_index ; load bank index into accumulator
+
+        sta MMC1_PRG ; send first bit to MMC1 PRG-ROM bank register
+
+        .repeat 4 ; repeat 4 times to send remaining bits
+            lsr a ; shift accumulator right to get next bit
+            sta MMC1_PRG ; send next bit to MMC1 PRG-ROM bank register
+        .endrep
 
         lda #0 ; reset sample address
         sta sample_address ; store new sample address
