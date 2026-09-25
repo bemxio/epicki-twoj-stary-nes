@@ -65,7 +65,7 @@
             sta $0600, x
             sta $0700, x
 
-            lda #$ff ; $ff needed to not display any sprites during initialization
+            lda #$ff ; needed to not display garbage
             sta OAM_BUFFER, x ; OAM buffer
 
             inx ; increment offset
@@ -272,7 +272,7 @@
                 beq controller_check_left ; jump if true
 
                 ; increment X position of stary
-                .repeat 1
+                .repeat STARY_SPEED
                     inc OAM_BUFFER + 3 ; first sprite
                     inc OAM_BUFFER + 7 ; second sprite
                     inc OAM_BUFFER + 11 ; third sprite
@@ -291,7 +291,7 @@
                 beq controller_check_down ; jump if true
 
                 ; decrement X position of stary
-                .repeat 1
+                .repeat STARY_SPEED
                     dec OAM_BUFFER + 3 ; first sprite
                     dec OAM_BUFFER + 7 ; second sprite
                     dec OAM_BUFFER + 11 ; third sprite
@@ -310,7 +310,7 @@
                 beq controller_check_up ; jump if true
 
                 ; increment Y position of stary
-                .repeat 1
+                .repeat STARY_SPEED
                     inc OAM_BUFFER ; first sprite
                     inc OAM_BUFFER + 4 ; second sprite
                     inc OAM_BUFFER + 8 ; third sprite
@@ -329,7 +329,7 @@
                 beq :+ ; jump if true
 
                 ; decrement Y position of stary
-                .repeat 1
+                .repeat STARY_SPEED
                     dec OAM_BUFFER ; first sprite
                     dec OAM_BUFFER + 4 ; second sprite
                     dec OAM_BUFFER + 8 ; third sprite
@@ -338,8 +338,8 @@
             ; spawn ogiens
             jsr random ; generate random number
 
-            cmp #$f8 ; check if random number is greater than or equal to 248 (~5% chance)
-            bcc :+ ; jump if false
+            cmp #OGIEN_SPAWN_CHANCE ; check if random number is greater than or equal to spawn chance
+            bcs :+ ; jump if true
 
             ldx #12 ; offset for sprite data
 
@@ -389,7 +389,10 @@
                 jsr init_sprites ; reset sprites
                 jmp :++ ; jump to next vblank
             :
-                inc OAM_BUFFER, x ; increment Y position of sprite
+                .repeat OGIEN_SPEED
+                    inc OAM_BUFFER, x ; increment Y position of sprite
+                .endrep
+
                 jmp ogiens_loop_next ; jump to next sprite
 
                 ogiens_loop_offscreen:
