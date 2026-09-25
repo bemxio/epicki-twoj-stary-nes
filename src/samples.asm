@@ -1,5 +1,4 @@
 .segment "BANK1"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $00000, $FF1 ; chunk #1
     .align 16
     .incbin "assets/bgm.dmc", $00FF1, $FF1 ; chunk #2
@@ -15,7 +14,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK2"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $03FC4, $FF1 ; chunk #5
     .align 16
     .incbin "assets/bgm.dmc", $04FB5, $FF1 ; chunk #6
@@ -31,7 +29,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK3"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $07F88, $FF1 ; chunk #9
     .align 16
     .incbin "assets/bgm.dmc", $08F79, $FF1 ; chunk #10
@@ -47,7 +44,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK4"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $0BF4C, $FF1 ; chunk #13
     .align 16
     .incbin "assets/bgm.dmc", $0CF3D, $FF1 ; chunk #14
@@ -63,7 +59,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK5"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $0FF10, $FF1 ; chunk #17
     .align 16
     .incbin "assets/bgm.dmc", $10F01, $FF1 ; chunk #18
@@ -79,7 +74,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK6"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $13ED4, $FF1 ; chunk #21
     .align 16
     .incbin "assets/bgm.dmc", $14EC5, $FF1 ; chunk #22
@@ -95,7 +89,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK7"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $17E98, $FF1 ; chunk #25
     .align 16
     .incbin "assets/bgm.dmc", $18E89, $FF1 ; chunk #26
@@ -111,7 +104,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK8"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $1BE5C, $FF1 ; chunk #29
     .align 16
     .incbin "assets/bgm.dmc", $1CE4D, $FF1 ; chunk #30
@@ -127,7 +119,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK9"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $1FE20, $FF1 ; chunk #33
     .align 16
     .incbin "assets/bgm.dmc", $20E11, $FF1 ; chunk #34
@@ -143,7 +134,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK10"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $23DE4, $FF1 ; chunk #37
     .align 16
     .incbin "assets/bgm.dmc", $24DD5, $FF1 ; chunk #38
@@ -159,7 +149,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK11"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $27DA8, $FF1 ; chunk #41
     .align 16
     .incbin "assets/bgm.dmc", $28D99, $FF1 ; chunk #42
@@ -175,7 +164,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK12"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $2BD6C, $FF1 ; chunk #45
     .align 16
     .incbin "assets/bgm.dmc", $2CD5D, $FF1 ; chunk #46
@@ -191,7 +179,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK13"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $2FD30, $FF1 ; chunk #49
     .align 16
     .incbin "assets/bgm.dmc", $30D21, $FF1 ; chunk #50
@@ -207,7 +194,6 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK14"
-    ; DMC sample data
     .incbin "assets/bgm.dmc", $33CF4, $FF1 ; chunk #53
     .align 16
     .incbin "assets/bgm.dmc", $34CE5, $FF1 ; chunk #54
@@ -223,4 +209,10 @@
     .word on_sample_end ; IRQ handler address
 
 .segment "BANK15"
-    ; empty for total ROM size of 256 KB
+    .res 16378 ; padding
+
+    ; vector table
+    .word on_vblank ; NMI handler address
+    .word on_reset ; reset handler address
+    .word on_sample_end ; IRQ handler address
+
