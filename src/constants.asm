@@ -21,3 +21,6 @@ MMC1_PRG = $E000
 
 ; memory locations
 OAM_BUFFER = $0200 ; sprite data in RAM
+
+; game constants
+BANK_AMOUNT = 14 ; number of banks of sample data

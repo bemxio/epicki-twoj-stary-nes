@@ -185,6 +185,10 @@
         lda #$ff ; length of sample data in 16-byte units
         sta APU_DMC + 3 ; send value to APU DMC register
 
+        ; switch to first bank of sample data
+        inc bank_index ; increment bank index
+        jsr switch_bank ; switch to next bank of sample data
+
         ; start playing first sample
         lda #%00010000 ; enable DMC channel
         sta APU_STATUS ; send value to APU status register
@@ -432,18 +436,17 @@
         lda sample_address ; load current sample address
 
         cmp #$c0 ; check if last sample in bank has been played
-        bne :+ ; jump if not
+        bne :++ ; skip bank switching if not
 
-        ; switch to next bank of sample data
+        lda bank_index ; load current bank index
+        cmp #BANK_AMOUNT ; check if bank index is equal to number of banks
+        bne :+ ; skip resetting bank index if not
+
+        lda #0 ; reset bank index
+        sta bank_index ; store new bank index
+    :
         inc bank_index ; increment bank index
-        lda bank_index ; load bank index into accumulator
-
-        sta MMC1_PRG ; send first bit to MMC1 PRG-ROM bank register
-
-        .repeat 4 ; repeat 4 times to send remaining bits
-            lsr a ; shift accumulator right to get next bit
-            sta MMC1_PRG ; send next bit to MMC1 PRG-ROM bank register
-        .endrep
+        jsr switch_bank ; switch to next bank of sample data
 
         lda #0 ; reset sample address
         sta sample_address ; store new sample address

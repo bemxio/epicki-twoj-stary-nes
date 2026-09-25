@@ -46,6 +46,17 @@ read_joystick_safe:
 
     rts ; return from subroutine
 
+switch_bank:
+    lda bank_index ; load bank index into accumulator
+    sta MMC1_PRG ; send first bit to MMC1 PRG-ROM bank register
+
+    .repeat 4 ; repeat 4 times to send remaining bits
+        lsr a ; shift accumulator right to get next bit
+        sta MMC1_PRG ; send next bit to MMC1 PRG-ROM bank register
+    .endrep
+
+    rts ; return from subroutine
+
 random: ; https://www.nesdev.org/wiki/Random_number_generator#Simple
     lda #8 ; iteration count (generates 8 bits)
     sta temp ; store value in variable
