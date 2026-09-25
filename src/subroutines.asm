@@ -134,8 +134,6 @@ init_sprites:
         sta OAM_BUFFER, x ; store value in OAM buffer
 
         inx ; increment offset
-
-        cpx #64 ; check if all bytes of OAM buffer have been cleared
         bne init_sprites_clear ; loop if not done
 
     rts ; return from subroutine
