@@ -32,13 +32,21 @@
         sei ; disable interrupts
         cld ; disable decimal mode
 
-        ; disable APU IRQs
-        lda #%01000000 ; mode 0 (4-step), IRQ inhibit flag enabled
-        sta APU_FRAME_COUNTER ; send value to APU frame counter
-
         ; initalize stack pointer
         ldx #$ff ; stack address
         txs ; transfer value to stack pointer
+
+        ; initialize MMC1
+        lda #$80 ; reset MMC1 shift register
+        sta MMC1_CTRL ; send value to MMC1 control register
+
+        lda #%01000 ; fixed first PRG-ROM bank, one-screen nametable arrangement
+        sta MMC1_CTRL ; send first bit to MMC1 control register
+
+        .repeat 4 ; repeat 4 times to send remaining bits
+            lsr a ; shift accumulator right to get next bit
+            sta MMC1_CTRL ; send next bit to MMC1 control register
+        .endrep
 
         ; disable NMI, rendering, and DMC IRQs
         lda #0 ; value to send to appropriate registers
@@ -46,6 +54,10 @@
         sta PPU_CTRL ; send value to PPU control register
         sta PPU_MASK ; send value to PPU mask register
         sta APU_DMC ; send value to APU DMC
+
+        ; disable APU IRQs
+        lda #%01000000 ; mode 0 (4-step), IRQ inhibit flag enabled
+        sta APU_FRAME_COUNTER ; send value to APU frame counter
 
         bit PPU_STATUS ; clear vblank flag
         jsr wait_for_vblank ; wait for vblank to ensure PPU is ready
@@ -115,8 +127,8 @@
         ldx #32 ; number of pages of tile data
         ldy #0 ; offset for tile data
 
-        sty PPU_ADDR ; set low byte of PPU memory address
         sty PPU_ADDR ; set high byte of PPU memory address
+        sty PPU_ADDR ; set low byte of PPU memory address
 
         copy_tiles:
             lda (temp), y ; load byte of tile data
@@ -159,22 +171,6 @@
         lda #%10110000 ; enable NMI on vblank, 8x16 sprite size, $1000 as background pattern table address
         sta PPU_CTRL ; send value to PPU control register
 
-        ; show sprites and background
-        lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
-        sta PPU_MASK ; send value to PPU mask register
-
-        ; initialize MMC1
-        lda #$80 ; reset MMC1 shift register
-        sta MMC1_CTRL ; send value to MMC1 control register
-
-        lda #%01000 ; fixed first PRG-ROM bank, horizontal mirroring
-        sta MMC1_CTRL ; send first bit to MMC1 control register
-
-        .repeat 4 ; repeat 4 times to send remaining bits
-            lsr a ; shift accumulator right to get next bit
-            sta MMC1_CTRL ; send next bit to MMC1 control register
-        .endrep
-
         ; set up APU
         lda #%10001000 ; IRQ enabled, loop disabled, ~9.42 kHz sample rate
         sta APU_DMC ; send value to APU DMC register
@@ -188,6 +184,10 @@
         ; switch to first bank of sample data
         inc bank_index ; increment bank index
         jsr switch_bank ; switch to next bank of sample data
+
+        ; show sprites and background
+        lda #%00011110 ; enable background and sprite rendering, show both in leftmost 8 pixels
+        sta PPU_MASK ; send value to PPU mask register
 
         ; start playing first sample
         lda #%00010000 ; enable DMC channel
